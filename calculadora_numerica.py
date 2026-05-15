@@ -647,8 +647,6 @@ class VentanaMuller:
         self.entry_max.insert(0, "100")
         self.entry_max.grid(row=5, column=1, padx=4, pady=3, sticky="w")
 
-#######################################################
-
         bc = tk.Button(left, text="▶  Calcular", command=self._calcular)
         estilo_boton(bc); bc.pack(fill=tk.X, pady=10)
 
@@ -812,6 +810,12 @@ class VentanaMuller:
 
 
 # ══════════════════════════════════════════════════════════════════
+#   VENTANA: POLINOMIO INTERPOLANTE DE NEWTON
+# ══════════════════════════════════════════════════════════════════
+
+
+
+# ══════════════════════════════════════════════════════════════════
 #   MENÚ PRINCIPAL
 # ══════════════════════════════════════════════════════════════════
 
@@ -819,7 +823,7 @@ class MenuPrincipal:
     def __init__(self, root):
         self.root = root
         self.root.title("Calculadora de Métodos Numéricos")
-        self.root.geometry("500x400")
+        self.root.geometry("500x550")
         self.root.configure(bg=AZUL)
         self.root.resizable(False, False)
         self._build()
@@ -835,8 +839,9 @@ class MenuPrincipal:
         metodos = [
             ("📐  Interpolación de Neville",  self._abrir_neville,  "#3a7ebf"),
             ("📏  Interpolación de Lagrange", self._abrir_lagrange, "#2e6da4"),
-            ("🔍  Newton-Raphson (Raíces)",   self._abrir_newton,   "#1a5276"),
+            ("🔍  Newton-Raphson (Raíces)",   self._abrir_newton,   "#235f85"),
             ("🔍  Muller",   self._abrir_muller,   "#10354d"),
+            ("🔍  Interpolante de Newton",   self._abrir_interpolanteNewton,   "#19405a"),
         ]
         for txt, cmd, color in metodos:
             btn = tk.Button(self.root, text=txt, command=cmd,
@@ -860,6 +865,10 @@ class MenuPrincipal:
 
     def _abrir_muller(self):
         VentanaMuller()
+    
+    def _abrir_interpolanteNewton(self):
+        VentanaMuller()
+
 
 
 # ══════════════════════════════════════════════════════════════════
