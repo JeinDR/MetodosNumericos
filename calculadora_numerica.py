@@ -95,6 +95,72 @@ def newton_raphson(func_str, x0, tol=1e-7, max_iter=100):
 
     return xi, iteraciones, f, fp
 
+def muller(func_str, x0, x1, x2, tol, mx=100):
+    x = Symbol('x')
+
+    try:
+        f_sym = sympify(func_str)
+        f = lambdify(x, f_sym, 'numpy')
+    except Exception as e:
+        raise ValueError(f"Función inválida: {e}")
+
+    iteraciones = []
+
+    x0 = complex(float(x0))
+    x1 = complex(float(x1))
+    x2 = complex(float(x2))
+
+    for i in range(1, mx + 1):
+        f0 = complex(f(x0))
+        f1 = complex(f(x1))
+        f2 = complex(f(x2))
+
+        h0 = x1 - x0
+        h1 = x2 - x1
+
+        if abs(h0) < 1e-12 or abs(h1) < 1e-12:
+            raise ValueError("Los puntos iniciales no deben ser iguales.")
+
+        d0 = (f1 - f0) / h0
+        d1 = (f2 - f1) / h1
+
+        a = (d1 - d0) / (h1 + h0)
+        b = a * h1 + d1
+        c = f2
+
+        discriminante = b**2 - 4*a*c
+        raiz_disc = discriminante**0.5
+
+        den1 = b + raiz_disc
+        den2 = b - raiz_disc
+
+        if abs(den1) > abs(den2):
+            denominador = den1
+        else:
+            denominador = den2
+
+        if abs(denominador) < 1e-12:
+            raise ValueError("Denominador cercano a cero. Elige otros puntos iniciales.")
+
+        x3 = x2 - (2 * c) / denominador
+        error = abs(x3 - x2)
+
+        iteraciones.append((i, x0, x1, x2, f2, x3, error))
+
+        if error < tol:
+            x2 = x3
+            break
+
+        x0 = x1
+        x1 = x2
+        x2 = x3
+
+    if abs(x2.imag) < 1e-10:
+        x2 = x2.real
+
+    return x2, iteraciones, f
+
+
 
 # ══════════════════════════════════════════════════════════════════
 #   UTILIDADES DE UI
@@ -288,11 +354,11 @@ class VentanaLagrange:
         tk.Label(left, text="Interpolación de Lagrange",
                  font=("Arial", 14, "bold"), bg=FONDO, fg=AZUL).pack(pady=(0,10))
 
-        sec = frame_seccion(left, "Puntos (x, y)")
+        sec = frame_seccion(left, "Valores de x")
         sec.pack(fill=tk.X)
         self.tframe = tk.Frame(sec, bg=FONDO)
         self.tframe.pack()
-        tabla_header(self.tframe, ["X", "Y", ""])
+        tabla_header(self.tframe, ["X"])
         self.next_row = 1
         for _ in range(4):
             self._add_row()
@@ -531,6 +597,220 @@ class VentanaNewtonRaphson:
 
 
 # ══════════════════════════════════════════════════════════════════
+#   VENTANA: MULLER
+# ══════════════════════════════════════════════════════════════════
+
+class VentanaMuller:
+    def __init__(self):
+        self.win = ventana_base("Método de Muller", ancho=1000, alto=680)
+        self._build()
+
+    def _build(self):
+        left = tk.Frame(self.win, bg=FONDO, padx=12, pady=12)
+        left.pack(side=tk.LEFT, fill=tk.Y)
+
+        tk.Label(left, text="Muller",
+                 font=("Arial", 14, "bold"), bg=FONDO, fg=AZUL).pack(pady=(0,10))
+
+        # entradas
+        sec = frame_seccion(left, "Parámetros")
+        sec.pack(fill=tk.X)
+
+        tk.Label(sec, text="f(x) =", bg=FONDO, font=("Arial", 10)).grid(row=0, column=0, sticky="w", pady=3)
+        self.entry_f = tk.Entry(sec, width=22, font=("Arial", 11))
+        self.entry_f.insert(0, "x**3 - x - 2")
+        self.entry_f.grid(row=0, column=1, padx=4, pady=3)
+
+        tk.Label(sec, text="x₀ =", bg=FONDO, font=("Arial", 10)).grid(row=1, column=0, sticky="w", pady=3)
+        self.entry_x0 = tk.Entry(sec, width=10, font=("Arial", 11))
+        self.entry_x0.insert(0, "0.5")
+        self.entry_x0.grid(row=1, column=1, padx=4, pady=3, sticky="w")
+
+        tk.Label(sec, text="x₁ =", bg=FONDO, font=("Arial", 10)).grid(row=2, column=0, sticky="w", pady=3)
+        self.entry_x1 = tk.Entry(sec, width=10, font=("Arial", 11))
+        self.entry_x1.insert(0, "1")
+        self.entry_x1.grid(row=2, column=1, padx=4, pady=3, sticky="w")
+
+        tk.Label(sec, text="x₂ =", bg=FONDO, font=("Arial", 10)).grid(row=3, column=0, sticky="w", pady=3)
+        self.entry_x2 = tk.Entry(sec, width=10, font=("Arial", 11))
+        self.entry_x2.insert(0, "1.5")
+        self.entry_x2.grid(row=3, column=1, padx=4, pady=3, sticky="w")
+
+        tk.Label(sec, text="Tolerancia =", bg=FONDO, font=("Arial", 10)).grid(row=4, column=0, sticky="w", pady=3)
+        self.entry_tol = tk.Entry(sec, width=10, font=("Arial", 11))
+        self.entry_tol.insert(0, "1e-7")
+        self.entry_tol.grid(row=4, column=1, padx=4, pady=3, sticky="w")
+
+        tk.Label(sec, text="Máx iteraciones =", bg=FONDO, font=("Arial", 10)).grid(row=5, column=0, sticky="w", pady=3)
+        self.entry_max = tk.Entry(sec, width=10, font=("Arial", 11))
+        self.entry_max.insert(0, "100")
+        self.entry_max.grid(row=5, column=1, padx=4, pady=3, sticky="w")
+
+#######################################################
+
+        bc = tk.Button(left, text="▶  Calcular", command=self._calcular)
+        estilo_boton(bc); bc.pack(fill=tk.X, pady=10)
+
+        # resultado
+        sec2 = frame_seccion(left, "Raíz encontrada")
+        sec2.pack(fill=tk.X)
+        self.lbl_result = tk.Label(sec2, text="—", font=("Courier", 11, "bold"),
+                                   bg=BLANCO, relief=tk.SUNKEN, padx=4, pady=6)
+        self.lbl_result.pack(fill=tk.X)
+
+        # tabla iteraciones
+        sec3 = frame_seccion(left, "Iteraciones")
+        sec3.pack(fill=tk.BOTH, expand=True, pady=(8,0))
+
+        cols_frame = tk.Frame(sec3, bg=FONDO)
+        cols_frame.pack(fill=tk.X)
+        columnas = [
+            ("n", 5),
+            ("x₀", 11),
+            ("x₁", 11),
+            ("x₂", 11),
+            ("f(x₂)", 11),
+            ("x₃", 11),
+            ("Error", 11)
+        ]
+        for c, (h,ancho) in enumerate(columnas):
+            tk.Label(cols_frame, text=h, bg=AZUL, fg=BLANCO,
+                     font=("Arial", 8, "bold"), width=ancho, relief=tk.FLAT
+                     ).grid(row=0, column=c, padx=1, pady=1)
+
+        self.iter_text = tk.Text(sec3, height=14, font=("Courier", 8),
+                                 state=tk.DISABLED, bg=BLANCO, relief=tk.SUNKEN)
+        self.iter_text.pack(fill=tk.BOTH, expand=True)
+
+        # derecha (gráfica)
+        right = tk.Frame(self.win, bg=FONDO, padx=10, pady=10)
+        right.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+        self.fig, self.ax = plt.subplots(figsize=(6,5))
+        self.fig.patch.set_facecolor(FONDO)
+        self.canvas = FigureCanvasTkAgg(self.fig, master=right)
+        self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+
+    def formatear_real_complejo(self, valor, dec=7):
+        valor = complex(valor)
+
+        if abs(valor.imag) < 1e-10:
+            return f"{valor.real:.{dec}f}"
+
+        signo = "+" if valor.imag >= 0 else "-"
+        return f"{valor.real:.{dec}f}{signo}{abs(valor.imag):.{dec}f}j"
+
+    def _calcular(self):
+        func_str = self.entry_f.get().strip()
+        try:
+            x0  = float(self.entry_x0.get())
+            x1  = float(self.entry_x1.get())
+            x2  = float(self.entry_x2.get())
+            tol = float(self.entry_tol.get())
+            mx  = int(self.entry_max.get())
+        except ValueError:
+            messagebox.showerror("Error", "Verifica los valores numéricos.", parent=self.win)
+            return
+        try:
+            raiz, iters, f = muller(func_str, x0, x1, x2, tol, mx)
+        except Exception as e:
+            messagebox.showerror("Error", str(e), parent=self.win); 
+            return
+
+        self.lbl_result.config(text=f"x ≈ {self.formatear_real_complejo(raiz, 7)}")
+
+        # tabla iteraciones
+        self.iter_text.config(state=tk.NORMAL)
+        self.iter_text.delete("1.0", tk.END)
+
+        for n, x0_i, x1_i, x2_i, f2_i, x3_i, err in iters:
+            linea = (f"{n:>3}  "
+                    f"{self.formatear_real_complejo(x0_i):>11}  "
+                    f"{self.formatear_real_complejo(x1_i):>10}  "
+                    f"{self.formatear_real_complejo(x2_i):>10}  "
+                    f"{self.formatear_real_complejo(f2_i):>10}  "
+                    f"{self.formatear_real_complejo(x3_i):>10}  "
+                    f"{err:>11.2e}\n"
+            )
+            self.iter_text.insert(tk.END, linea)
+        self.iter_text.config(state=tk.DISABLED)
+
+        self._graficar(func_str, raiz, iters, f)
+
+    def _graficar(self, func_str, raiz, iters, f):
+        self.ax.clear()
+        raiz_c = complex(raiz)
+
+        if abs(raiz_c.imag) > 1e-10:
+            self.ax.text(
+                0.5, 0.5,
+                "La raíz encontrada es compleja.\nNo se puede marcar en una gráfica real.",
+                ha="center",
+                va="center",
+                transform=self.ax.transAxes,
+                fontsize=11
+            )
+            self.ax.set_title("Método de Müller")
+            self.canvas.draw()
+            return
+    
+        raiz_real = raiz_c.real
+
+        x0_val = float(self.entry_x0.get())
+        x1_val = float(self.entry_x1.get())
+        x2_val = float(self.entry_x2.get())
+
+        margen = max(
+            abs(raiz_real - x0_val) * 1.5,
+            abs(raiz_real - x1_val) * 1.5,
+            abs(raiz_real - x2_val) * 1.5,
+            2
+        )
+
+        t = np.linspace(raiz_real - margen, raiz_real + margen, 400)
+
+        try:
+            yt = f(t)
+            yt = np.real_if_close(yt)
+        except Exception:
+            return
+
+        self.ax.plot(t, yt, 'b-', lw=2, label=f'f(x) = {func_str}')
+        self.ax.axhline(0, color='black', lw=0.8)
+        self.ax.axvline(
+            raiz_real,
+            color='red',
+            lw=1.2,
+            linestyle='--',
+            label=f'Raíz ≈ {raiz_real:.6f}'
+        )
+        self.ax.scatter([raiz_real], [0], color='red', zorder=5, s=80)
+
+        # trazar aproximaciones
+        xs = [x0_val, x1_val, x2_val]
+        for it in iters:
+            x3 = complex(it[5])
+            if abs(x3.imag) < 1e-10:
+                xs.append(x3.real)
+                
+        for xi in xs:
+            try:
+                fxi_val = f(xi)
+                fxi_val = complex(fxi_val)
+
+                if abs(fxi_val.imag) < 1e-10:
+                    fxi_val = fxi_val.real
+                    self.ax.scatter([xi], [fxi_val], color='orange', zorder=4, s=30)
+                    self.ax.plot([xi, xi], [0, fxi_val], 'orange', lw=0.7, linestyle=':')
+            except Exception:
+                pass
+
+        self.ax.set_title("Muller")
+        self.ax.set_xlabel("x"); self.ax.set_ylabel("f(x)")
+        self.ax.legend(fontsize=8); self.ax.grid(True)
+        self.fig.tight_layout(); self.canvas.draw()
+
+
+# ══════════════════════════════════════════════════════════════════
 #   MENÚ PRINCIPAL
 # ══════════════════════════════════════════════════════════════════
 
@@ -555,6 +835,7 @@ class MenuPrincipal:
             ("📐  Interpolación de Neville",  self._abrir_neville,  "#3a7ebf"),
             ("📏  Interpolación de Lagrange", self._abrir_lagrange, "#2e6da4"),
             ("🔍  Newton-Raphson (Raíces)",   self._abrir_newton,   "#1a5276"),
+            ("🔍  Muller",   self._abrir_muller,   "#10354d"),
         ]
         for txt, cmd, color in metodos:
             btn = tk.Button(self.root, text=txt, command=cmd,
@@ -575,6 +856,9 @@ class MenuPrincipal:
 
     def _abrir_newton(self):
         VentanaNewtonRaphson()
+
+    def _abrir_muller(self):
+        VentanaMuller()
 
 
 # ══════════════════════════════════════════════════════════════════
