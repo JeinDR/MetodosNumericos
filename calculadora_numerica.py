@@ -115,17 +115,18 @@ def muller(func_str, x0, x1, x2, tol, mx=100):
         f1 = complex(f(x1))
         f2 = complex(f(x2))
 
-        h0 = x1 - x0
-        h1 = x2 - x1
+        h0 = x0 - x2
+        h1 = x1 - x2
+        h2 = x0 - x1
 
-        if abs(h0) < 1e-12 or abs(h1) < 1e-12:
+        if h0 == 0 or h1 == 0 or h2 == 0:
             raise ValueError("Los puntos iniciales no deben ser iguales.")
 
-        d0 = (f1 - f0) / h0
-        d1 = (f2 - f1) / h1
+        d0 = (f1 - f2)
+        d1 = (f0 - f2)
 
-        a = (d1 - d0) / (h1 + h0)
-        b = a * h1 + d1
+        a = (h1*d1- h0*d0)/(h0*h1*h2)
+        b = (h0**2*d0- h1**2*d1)/(h0*h1*h2)
         c = f2
 
         discriminante = b**2 - 4*a*c
