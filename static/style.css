@@ -1,0 +1,123 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #e9f5f4;
+    margin: 0;
+    padding: 0;
+    color: #222;
+}
+
+header {
+    background-color: #0f766e;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
+main {
+    width: 90%;
+    max-width: 900px;
+    margin: 25px auto;
+    background-color: white;
+    padding: 25px;
+    border-radius: 10px;
+}
+
+h2 {
+    color: #0f766e;
+}
+
+label {
+    font-weight: bold;
+    display: block;
+    margin-top: 15px;
+}
+
+select,
+input,
+button {
+    padding: 10px;
+    margin-top: 5px;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 15px;
+}
+
+select,
+input {
+    border: 1px solid #aaa;
+    border-radius: 5px;
+}
+
+button {
+    background-color: #0f766e;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 15px;
+}
+
+button:hover {
+    background-color: #115e59;
+}
+
+.fila-datos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.caja {
+    margin-top: 25px;
+    padding: 15px;
+    background-color: #f3f4f6;
+    border-radius: 8px;
+}
+
+#resultado {
+    white-space: pre-wrap;
+    font-family: Consolas, monospace;
+    background-color: white;
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+#grafica-contenedor {
+    margin-top: 25px;
+    display: none;
+}
+
+.oculto {
+    display: none;
+}
+
+/* Quitar flechitas de los inputs tipo number */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.calculadora-funcion {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.calculadora-funcion button {
+    padding: 10px;
+    font-size: 16px;
+}
+
+.ayuda-funcion {
+    font-size: 14px;
+    color: #555;
+}
