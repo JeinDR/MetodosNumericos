@@ -121,3 +121,24 @@ input[type="number"] {
     font-size: 14px;
     color: #555;
 }
+
+.menu-metodos {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.menu-metodos a {
+    display: block;
+    text-decoration: none;
+    background-color: #0f766e;
+    color: white;
+    padding: 12px;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.menu-metodos a:hover {
+    background-color: #115e59;
+}
