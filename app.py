@@ -73,13 +73,13 @@ def muller():
         tolerancia = request.form.get("tolerancia")
 
         resultado = f"""
-Método: Müller
-Función: {funcion}
-x0: {x0}
-x1: {x1}
-x2: {x2}
-Tolerancia: {tolerancia}
-"""
+            Método: Müller
+            Función: {funcion}
+            x0: {x0}
+            x1: {x1}
+            x2: {x2}
+            Tolerancia: {tolerancia}
+            """
 
     return render_template("ventana_muller.html", resultado=resultado)
 
