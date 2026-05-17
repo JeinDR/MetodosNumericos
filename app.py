@@ -122,23 +122,5 @@ Valor a evaluar: {valor_x}
     return render_template("ventana_neville.html", resultado=resultado)
 
 
-@app.route("/newton-dd", methods=["GET", "POST"])
-def newton_dd():
-    resultado = ""
-
-    if request.method == "POST":
-        x = request.form.getlist("x")
-        fx = request.form.getlist("fx")
-        valor_x = request.form.get("valor_x")
-
-        resultado = f"""
-Método: Newton Diferencias Divididas
-Valores de x: {x}
-Valores de f(x): {fx}
-Valor a evaluar: {valor_x}
-"""
-
-    return render_template("ventana_newton_dd.html", resultado=resultado)
-
 if __name__ == "__main__":
     app.run(debug=True)
