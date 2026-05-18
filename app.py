@@ -2,7 +2,9 @@ from flask import Flask, render_template, request
 import math
 import re
 from metodos.newton_raphson import calcular_newton_raphson
+from metodos.lagrange import calcular_lagrange
 import numpy as np
+import json
 
 app = Flask(__name__)
 
@@ -15,6 +17,7 @@ def index():
 @app.route("/newton-raphson", methods=["GET", "POST"])
 def newton_raphson():
     resultado = ""
+    polinomio = ""
     grafica = None
 
     if request.method == "POST":
@@ -87,22 +90,39 @@ def muller():
 @app.route("/lagrange", methods=["GET", "POST"])
 def lagrange():
     resultado = ""
+    iteraciones = []
+    grafica = None
 
     if request.method == "POST":
-        x = request.form.getlist("x")
-        fx = request.form.getlist("fx")
-        valor_x = request.form.get("valor_x")
+        try:
+            xs = request.form.getlist("x")
+            fxs = request.form.getlist("fx")
+            valor_x = request.form.get("valor_x")
 
-        resultado = f"""
-Método: Lagrange
-Valores de x: {x}
-Valores de f(x): {fx}
-Valor a evaluar: {valor_x}
-"""
+            datax = [float(v) for v in xs if v.strip() != ""]
+            datay = [float(v) for v in fxs if v.strip() != ""]
+            vx = float(valor_x)
 
-    return render_template("ventana_lagrange.html", resultado=resultado)
+            polinomio_texto, resultado_val, iteraciones, f = calcular_lagrange(datax, datay, vx)
 
+            resultado = f"P(x) = {polinomio_texto}<br>P({vx}) ≈ {resultado_val}"
 
+            # Generar gráfica igual que newton_raphson
+            x_min, x_max = min(datax) - 1, max(datax) + 1
+            x_vals = np.linspace(x_min, x_max, 200).tolist()
+            y_vals = [float(f(xi)) for xi in x_vals]
+
+            grafica = json.dumps([{"x": xi, "y": yi} for xi, yi in zip(x_vals, y_vals)])
+
+        except Exception as e:
+            resultado = f"Error: {e}"
+
+    return render_template(
+        "ventana_lagrange.html",
+        resultado=resultado,
+        iteraciones=iteraciones,
+        grafica=grafica
+    )
 @app.route("/neville", methods=["GET", "POST"])
 def neville():
     resultado = ""

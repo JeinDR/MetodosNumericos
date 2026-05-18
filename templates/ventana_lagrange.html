@@ -5,31 +5,19 @@
     <title>Proyecto</title>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+    <link rel="stylesheet" href="../static/style.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
 
 <header>
-    <h1>Calculadora de Métodos Numéricos</h1>
-    <p>Proyecto</p>
+    <h1>Metodo Lagrange</h1>
+    <p>Ingrese la cantidad de valores x y f(x) y el valor para calcular</p>
 </header>
 
 <main>
-
     <form method="POST">
-
-        <h2>Seleccionar método</h2>
-
-        <label for="metodo">Método:</label>
-        <select id="metodo" name="metodo">
-            <option value="newton-raphson">Newton-Raphson</option>
-            <option value="muller">Método de Muller</option>
-            <option value="lagrange">Polinomio Interpolante de Lagrange</option>
-            <option value="neville">Método de Neville</option>
-            <option value="newton-dd">Polinomio Interpolante de Newton</option>
-        </select>
 
         <div id="datos-section" class="caja">
             <h2>Datos</h2>
@@ -77,12 +65,13 @@
 
                 <button type="button" onclick="insertarFuncion('+')">+</button>
                 <button type="button" onclick="insertarFuncion('-')">-</button>
-                <button type="button" onclick="insertarFuncion('*')">×</button>
+                <button type="button" onclick="insertarFuncion('*')">*</button>
                 <button type="button" onclick="insertarFuncion('/')">÷</button>
 
                 <button type="button" onclick="insertarFuncion('(')">(</button>
                 <button type="button" onclick="insertarFuncion(')')">)</button>
                 <button type="button" onclick="insertarFuncion('pi')">π</button>
+                <button type="button" onclick="insertarFuncion('e')">e</button>
                 <button type="button" onclick="limpiarFuncion()">C</button>
             </div>
 
@@ -107,6 +96,22 @@
         <h2>Resultado</h2>
         <div id="resultado">{{ resultado }}</div>
     </div>
+    
+    <div class="caja">
+        <h2>Resultado</h2>
+        <div id="resultado">{{ resultado | safe }}</div>
+
+        {% if iteraciones %}
+        <h3>Iteraciones</h3>
+        <ul>
+            {% for paso in iteraciones %}
+                <li>{{ paso }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+
+
 
     {% if grafica %}
     <div id="grafica-contenedor" class="caja" style="display: block;">
@@ -114,94 +119,50 @@
         <canvas id="grafica"></canvas>
     </div>
     {% endif %}
-
+      <a href="{{ url_for('index') }}">
+        <button type="button">Volver al menú</button>
+    </a>
 </main>
-
-<script>
-    const metodo = document.getElementById("metodo");
-    const datosSection = document.getElementById("datos-section");
-    const funcionSection = document.getElementById("funcion-section");
-    const multiplicidadSection = document.getElementById("multiplicidad-section");
-    const labelX = document.getElementById("label-x");
-    const datos = document.getElementById("datos");
-    const toleranciaSection = document.getElementById("tolerancia-section");
-
-    function cambiarVista() {
-        if (
-            metodo.value === "newton-raphson" ||
-            metodo.value === "muller"
-        ) {
-            funcionSection.classList.remove("oculto");
-            datosSection.classList.add("oculto");
-            toleranciaSection.classList.remove("oculto");
-            labelX.textContent = "Valor inicial:";
-        } else {
-            funcionSection.classList.add("oculto");
-            datosSection.classList.remove("oculto");
-            toleranciaSection.classList.add("oculto");
-            labelX.textContent = "Valor de x a evaluar:"
-        }
-    }
-
-    metodo.addEventListener("change", cambiarVista);
-    cambiarVista();
-
-    function agregarFila() {
+  function agregarFila() {
+        const datos = document.getElementById("datos");
         const numero = datos.children.length + 1;
-
         const div = document.createElement("div");
         div.className = "fila-datos";
-
         div.innerHTML = `
             <input type="text" name="x" placeholder="x${numero}">
             <input type="text" name="fx" placeholder="f(x${numero})">
         `;
-
         datos.appendChild(div);
     }
+</script>
 
-    function insertarFuncion(texto) {
-        const input = document.getElementById("funcion");
-        input.value += texto;
-        input.focus();
-    }
-
-    function limpiarFuncion() {
-        document.getElementById("funcion").value = "";
-    }
-
-    function ponerEjemplo() {
-        const ejemplo = document.getElementById("ejemplos").value;
-
-        if (ejemplo !== "") {
-            document.getElementById("funcion").value = ejemplo;
-        }
-    }
-
-    {% if grafica %}
-    const puntos = {{ grafica | tojson }};
-    const ctx = document.getElementById("grafica");
+{% if grafica %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const puntos = {{ grafica | safe }};
+    const ctx = document.getElementById("grafica").getContext("2d");
 
     new Chart(ctx, {
         type: "scatter",
         data: {
             datasets: [{
-                label: "Función",
+                label: "Polinomio de Lagrange",
                 data: puntos,
-                showLine: true
+                showLine: true,
+                borderColor: "blue",
+                backgroundColor: "blue",
+                pointRadius: 2
             }]
         },
         options: {
             scales: {
-                x: {
-                    type: "linear",
-                    position: "bottom"
-                }
+                x: { type: "linear", position: "bottom" }
             }
         }
     });
-    {% endif %}
 </script>
+{% endif %}
+
 
 </body>
 </html>

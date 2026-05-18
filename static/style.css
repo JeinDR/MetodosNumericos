@@ -61,6 +61,7 @@ button:hover {
     background-color: #115e59;
 }
 
+
 .fila-datos {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -73,6 +74,13 @@ button:hover {
     padding: 15px;
     background-color: #f3f4f6;
     border-radius: 8px;
+}
+
+
+
+
+#titulo_Metodo  {
+    color: white;
 }
 
 #resultado {
