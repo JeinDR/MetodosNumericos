@@ -2,6 +2,8 @@ from flask import Flask, render_template, request
 import math
 import re
 from metodos.newton_raphson import calcular_newton_raphson
+from metodos.muller import calcular_muller
+
 import numpy as np
 
 app = Flask(__name__)
@@ -34,7 +36,7 @@ def newton_raphson():
             resultado += f"Valor inicial: {valor_x}\n"
             resultado += f"Tolerancia: {tolerancia}\n\n"
             resultado += "Iteraciones:\n"
-            resultado += " i \t Xi \t\tf(Xi)\t\tf'(Xi)\t\t|x(i)-x(i-1)|\t\tError\n"
+            resultado += " n \t xₙ \t\tf(xₙ)\t\tf'(xₙ)\t\txₙ₊₁|\t\tError\n"
 
             for it in iteraciones:
                 i, xi, fxi, fpxi, xi1, error = it
@@ -64,6 +66,7 @@ def newton_raphson():
 @app.route("/muller", methods=["GET", "POST"])
 def muller():
     resultado = ""
+    grafica = None
 
     if request.method == "POST":
         funcion = request.form.get("funcion")
@@ -72,16 +75,46 @@ def muller():
         x2 = request.form.get("x2")
         tolerancia = request.form.get("tolerancia")
 
-        resultado = f"""
-            Método: Müller
-            Función: {funcion}
-            x0: {x0}
-            x1: {x1}
-            x2: {x2}
-            Tolerancia: {tolerancia}
-            """
+        try:
+            raiz, iteraciones, f = calcular_muller(
+                funcion,
+                float(x0),
+                float(x1),
+                float(x2),
+                float(tolerancia)
+            )
 
-    return render_template("ventana_muller.html", resultado=resultado)
+            resultado = "Método: Muller\n"
+            resultado += f"Función: {funcion}\n"
+            resultado += f"Valores iniciales: x0={x0}, x1={x1}, x2={x2}\n"
+            resultado += f"Tolerancia: {tolerancia}\n\n"
+            resultado += "Iteraciones:\n"
+            resultado += " n \t x₀ \t\t x₁ \t\t x₂ \t\t x₃ \t\t Error\n"
+           
+
+            for iteracion in iteraciones:
+                i, x0, x1, x2, f2, x3, error = iteracion
+                resultado += f"{i}\t{x0.real:.7f}\t{x1.real:.7f}\t{x2.real:.7f}\t{x3.real:.7f}\t{error:.7f}\n"
+
+            resultado += f"\nRaíz aproximada: {raiz.real:.10f}"
+            
+            xs = np.linspace(raiz - 5, raiz + 5, 100)
+            ys = f(xs)
+            
+            grafica = [
+            {"x": float(xs[i]), "y": float(ys[i].real)}
+            for i in range(len(xs))
+        ]
+
+        except Exception as e:
+            resultado = f"Error: {e}"
+    
+
+
+    return render_template(
+        "ventana_muller.html",
+        resultado=resultado,
+        grafica=grafica)
 
 
 @app.route("/lagrange", methods=["GET", "POST"])

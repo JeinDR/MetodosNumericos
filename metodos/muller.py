@@ -4,7 +4,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from sympy import Symbol, Poly, expand, sympify, diff, lambdify
 
 
-def muller(func_str, x0, x1, x2, tol, mx=100):
+def calcular_muller(func_str, x0, x1, x2, tol, mx=100):
     x = Symbol('x')
 
     try:
